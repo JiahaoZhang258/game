@@ -1,9 +1,9 @@
 """CUMCM 2026 C题 Q1：典型日计划购电 LP。
 
 约定（已确认）：
-- 时间戳 = 区间起点（附件1 的 0:10 对应 0:10-0:20，与 result1 模板对齐）
+- 时间戳 = 区间终点（附件1 的 0:10 对应 0:00-0:10）
 - 充、放效率各 90%；5000 kW 限制在交流侧
-- 0:00 SOC 自由，仅要求与 24:00 循环相等
+- 第一天 0:00 SOC = 6000 kWh；每日要求 24:00 与当日 0:00 相同，故午夜保持 6000
 - 不允许售电，允许弃光，购电功率无上限
 """
 from __future__ import annotations
@@ -30,6 +30,7 @@ DT = 1.0 / 6.0  # h
 P_MAX = 5000.0  # kW, AC side
 SOC_MIN = 1200.0
 SOC_MAX = 10800.0
+SOC0 = 6000.0
 T = 144
 
 
@@ -129,7 +130,7 @@ def solve_q1(data: dict) -> dict:
     bounds += [(0, P_MAX)] * T  # dis
     bounds += [(0, None)] * T  # curt
     bounds += [(SOC_MIN, SOC_MAX)] * T  # E_end
-    bounds += [(SOC_MIN, SOC_MAX)]  # E0
+    bounds += [(SOC0, SOC0)]  # E0 = 6000, cyclic ⇒ E_T = 6000
 
     A_eq = []
     b_eq = []
@@ -190,10 +191,12 @@ def solve_q1(data: dict) -> dict:
 
 
 def four_hour_bins(minutes: np.ndarray) -> list[np.ndarray]:
-    """Convention A: bin by start minute; 24:00 maps into 0:00-4:00 of the cycle."""
+    """Group endpoint-labelled 10-minute observations into natural-day blocks."""
+    if not np.array_equal(minutes, np.arange(10, 1441, 10)):
+        raise ValueError("Expected 144 interval endpoints from 0:10 to 24:00")
     bins = [[] for _ in range(6)]
     for i, m in enumerate(minutes):
-        bins[(int(m) % (24 * 60)) // 240].append(i)
+        bins[(int(m) - 10) // 240].append(i)
     return [np.array(ix, dtype=int) for ix in bins]
 
 
@@ -205,7 +208,7 @@ def summarize(data: dict, sol: dict) -> dict:
     curt_kwh = sol["curt_kw"] * DT
     cost = float(np.dot(data["price"], buy_kwh))
 
-    # specified 10-min slots (start timestamps)
+    # specified 10-min slots are identified by their interval endpoints
     want = {
         "10:00-10:10": 10 * 60,
         "12:00-12:10": 12 * 60,
@@ -216,7 +219,7 @@ def summarize(data: dict, sol: dict) -> dict:
     }
     table1 = {}
     for name, m in want.items():
-        idx = int(np.where(minutes == m)[0][0])
+        idx = int(np.where(minutes == m + 10)[0][0])
         table1[name] = float(buy_kwh[idx])
 
     windows = ["0:00-4:00", "4:00-8:00", "8:00-12:00", "12:00-16:00", "16:00-20:00", "20:00-24:00"]
@@ -258,7 +261,7 @@ def summarize(data: dict, sol: dict) -> dict:
         "dis_kwh": dis_kwh.tolist(),
         "curt_kwh": curt_kwh.tolist(),
         "soc_end": sol["soc_end"].tolist(),
-        "interval_labels": [interval_label(int(m)) for m in minutes],
+        "interval_labels": [interval_label(int(m) - 10) for m in minutes],
     }
 
 
@@ -270,11 +273,7 @@ def write_result1(summary: dict, out_path: Path) -> None:
     buys = summary["buy_kwh"]
     for i, (lab, val) in enumerate(zip(labels, buys)):
         row = i + 2
-        # keep template label; warn if mismatch
-        tpl = ws.cell(row, 1).value
-        if tpl and str(tpl).replace(" ", "") != lab.replace(" ", ""):
-            # still fill by row order (convention A)
-            pass
+        ws.cell(row, 1, lab)
         ws.cell(row, 2, round(val, 4))
 
     ws2 = wb["充放电量"]
@@ -290,11 +289,17 @@ def write_result1(summary: dict, out_path: Path) -> None:
 
 
 def main() -> None:
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--no-xlsx", action="store_true")
+    args = parser.parse_args()
     data = load_attachment1(DATA / "附件1.xlsx")
     sol = solve_q1(data)
     summary = summarize(data, sol)
     out_xlsx = ROOT / "result1.xlsx"
-    write_result1(summary, out_xlsx)
+    if not args.no_xlsx:
+        write_result1(summary, out_xlsx)
 
     slim = {k: v for k, v in summary.items() if k not in {"buy_kwh", "ch_kwh", "dis_kwh", "curt_kwh", "soc_end", "interval_labels"}}
     slim["result_file"] = str(out_xlsx)

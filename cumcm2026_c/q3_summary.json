@@ -1,0 +1,41 @@
+{
+  "parameters": {
+    "load_error_window": 7,
+    "adjustment_times": [
+      36,
+      72,
+      108
+    ],
+    "blend": 0.5,
+    "alpha": 0.7,
+    "terminal_value": 0.3,
+    "reserve_ratio": 0.625,
+    "terminal_soc_target": 2400.0
+  },
+  "summary": {
+    "variable_price": false,
+    "days": 334,
+    "intervals": 48096,
+    "plan_kwh": 20797194.85556738,
+    "adjusted_plan_kwh": 21060994.237660047,
+    "adjustment_up_kwh": 263799.38209266705,
+    "adjustment_down_kwh": 0.0,
+    "emergency_kwh": 54862.614348654286,
+    "plan_cost": 12677563.937554402,
+    "adjustment_cost": 302366.2543179365,
+    "emergency_cost": 297043.1614491886,
+    "total_cost": 13276973.353321528,
+    "january_end_soc": 10800.0,
+    "year_end_soc": 2437.243226481482
+  },
+  "validation": {
+    "status": "PASS",
+    "intervals": 48096,
+    "max_balance_error_kwh": 4.547473508864641e-13,
+    "max_soc_error_kwh": 0.0,
+    "soc_range_kwh": [
+      1200.0,
+      10800.0
+    ]
+  }
+}

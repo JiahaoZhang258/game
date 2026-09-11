@@ -1,0 +1,90 @@
+{
+  "parameters": {
+    "alpha": 0.825,
+    "error_window": 7,
+    "reserve_ratio": 0.625,
+    "terminal_value": 0.3,
+    "terminal_soc_target": 2400.0
+  },
+  "parameter_selection": {
+    "method": "lowest previously evaluated candidate adopted after retrospective comparison",
+    "selected": {
+      "alpha": 0.825,
+      "error_window": 7,
+      "reserve_ratio": 0.625,
+      "terminal_value": 0.3,
+      "terminal_soc_target": 2400.0
+    },
+    "source": "q2_borrowed_algorithm_experiment.csv",
+    "warmup": {
+      "alpha": 0.8,
+      "error_window": 7,
+      "reserve_ratio": 0.0,
+      "terminal_value": 0.6,
+      "terminal_soc_target": null
+    },
+    "warmup_forecast": "fixed weighted same-weekday load and four-day weighted PV",
+    "warning": "Decisions are causal conditional on the frozen configuration. Selection followed historical/full-year comparisons; this is not an independent held-out test or a proof of global optimality."
+  },
+  "causality": {
+    "status": "PASS",
+    "checks": [
+      "future dates do not change February 1 day-ahead inputs",
+      "future intraday observations do not change executed prefix"
+    ]
+  },
+  "baseline": {
+    "days": 334,
+    "intervals": 48096,
+    "plan_kwh": 20052249.652828112,
+    "emergency_kwh": 636138.6910062687,
+    "plan_cost": 12174846.234181965,
+    "emergency_cost": 3583370.016953554,
+    "total_cost": 15758216.251135519,
+    "charge_kwh": 6352322.917871552,
+    "discharge_kwh": 5152924.212615707,
+    "surplus_kwh": 1549800.1436118695,
+    "emergency_days": 275,
+    "state_at_report_start": 10800.0,
+    "period_start": "2025-02-01",
+    "period_end": "2025-12-31",
+    "period_end_soc": 2419.2787336111105,
+    "method": "same causal forecasts without error-quantile correction"
+  },
+  "summary": {
+    "days": 334,
+    "intervals": 48096,
+    "plan_kwh": 21394435.81195509,
+    "emergency_kwh": 98978.20512919965,
+    "plan_cost": 13082786.402163565,
+    "emergency_cost": 588377.9724950851,
+    "total_cost": 13671164.37465865,
+    "charge_kwh": 6396648.066670098,
+    "discharge_kwh": 5188715.338609739,
+    "surplus_kwh": 2346291.794057264,
+    "emergency_days": 154,
+    "state_at_report_start": 10800.0,
+    "period_start": "2025-02-01",
+    "period_end": "2025-12-31",
+    "period_end_soc": 2543.9948811565255
+  },
+  "validation": {
+    "status": "PASS",
+    "intervals": 48096,
+    "max_balance_error_kwh": 4.547473508864641e-13,
+    "max_soc_error_kwh": 0.0,
+    "soc_range_kwh": [
+      1200.0,
+      10800.0
+    ],
+    "checks": [
+      "date coverage",
+      "continuous cross-day SOC",
+      "energy balance",
+      "SOC bounds",
+      "power bounds",
+      "no simultaneous charge and discharge",
+      "cost reconciliation"
+    ]
+  }
+}

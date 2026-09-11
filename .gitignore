@@ -1,0 +1,26 @@
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Logs and transient run output
+*.log
+*.ndjson
+
+# Generated figures and previews
+*.png
+figures/
+
+# Generated intermediate experiment data
+*_run.json
+*_run_latest.json
+*_run_final.json
+*_rebuild_data.json
+*_experiments.json
+*_experiment.json
+*_audit.json
+*_validation.json
+*_trajectory.npz
+
+# Keep selected summary/result artifacts explicitly via git add -f when needed
